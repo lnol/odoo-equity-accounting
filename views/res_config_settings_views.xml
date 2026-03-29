@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_equity_accounting" model="ir.ui.view">
+        <field name="name">res.config.settings.equity.accounting</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='account']" position="inside">
+                <block title="Equity &amp; Investors" name="equity_accounting_setting_container">
+                    <setting string="Equity Journal"
+                        help="Default miscellaneous journal for equity transactions and dividend entries.">
+                        <field name="equity_journal_id"/>
+                    </setting>
+                    <setting string="Capital Contributions Receivable"
+                        help="Debited when shares are subscribed. Reconcile against the bank statement when the investor pays. Enable 'Allow Reconciliation' on this account. (SKR04: 1298)">
+                        <field name="equity_receivable_account_id"/>
+                    </setting>
+                    <setting string="Dividend Payment Bank/Cash Account"
+                        help="Account credited when dividends are paid out to shareholders.">
+                        <field name="equity_bank_account_id"/>
+                    </setting>
+                    <setting string="Dividend Payable Account"
+                        help="Liability account credited on dividend declaration, debited on payment (e.g. SKR03: 1700, SKR04: 3300).">
+                        <field name="dividend_payable_account_id"/>
+                    </setting>
+                    <setting string="Retained Earnings / Gewinnvortrag Account"
+                        help="Equity account debited when dividends are declared (e.g. SKR03: 0865, SKR04: 2970).">
+                        <field name="dividend_retained_earnings_account_id"/>
+                    </setting>
+                    <setting string="KapESt / SolZ Liability Account (German)"
+                        help="Account for withheld Kapitalertragsteuer and Solidaritätszuschlag (SKR03: 1746, SKR04: 3760).">
+                        <field name="withholding_tax_account_id"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

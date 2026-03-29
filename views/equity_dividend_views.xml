@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Search view -->
+    <record id="view_equity_dividend_search" model="ir.ui.view">
+        <field name="name">equity.dividend.search</field>
+        <field name="model">equity.dividend</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Declared" name="declared" domain="[('state', '=', 'declared')]"/>
+                <filter string="Paid" name="paid" domain="[('state', '=', 'paid')]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <group>
+                    <filter string="Company" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Year" name="group_year" context="{'group_by': 'date:year'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- List view -->
+    <record id="view_equity_dividend_list" model="ir.ui.view">
+        <field name="name">equity.dividend.list</field>
+        <field name="model">equity.dividend</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'cancelled'" decoration-info="state == 'draft'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="amount_per_share" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="total_gross_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="total_net_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'paid'"
+                    decoration-primary="state == 'declared'"
+                    decoration-info="state == 'draft'"
+                    decoration-danger="state == 'cancelled'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form view -->
+    <record id="view_equity_dividend_form" model="ir.ui.view">
+        <field name="name">equity.dividend.form</field>
+        <field name="model">equity.dividend</field>
+        <field name="arch" type="xml">
+            <form string="Dividend Declaration">
+                <header>
+                    <button name="action_compute_lines"
+                        string="Compute Lines"
+                        type="object"
+                        invisible="state != 'draft'"/>
+                    <button name="action_declare"
+                        string="Declare"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'draft'"
+                        confirm="This will post a journal entry for the dividend declaration. Continue?"
+                        data-hotkey="d"/>
+                    <button name="action_pay_all"
+                        string="Pay All"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state != 'declared'"
+                        confirm="This will create payment journal entries for all unpaid shareholders. Continue?"
+                        data-hotkey="p"/>
+                    <button name="action_cancel"
+                        string="Cancel"
+                        type="object"
+                        invisible="state in ('paid', 'cancelled')"
+                        confirm="Cancel this dividend? A reversal entry will be created if the declaration was posted."/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,declared,paid"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <field name="currency_id" invisible="1"/>
+                    <group>
+                        <group string="Dividend Details">
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="payment_date"/>
+                            <field name="amount_per_share" readonly="state != 'draft'" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="security_class_ids" widget="many2many_tags" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Totals">
+                            <field name="total_gross_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="total_net_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Distribution" name="distribution">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list>
+                                    <field name="holder_id"/>
+                                    <field name="shares" string="Eligible Shares"/>
+                                    <field name="gross_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="withholding_tax" widget="monetary" options="{'currency_field': 'currency_id'}"
+                                        column_invisible="not parent.apply_withholding_tax"/>
+                                    <field name="soli_amount" widget="monetary" options="{'currency_field': 'currency_id'}"
+                                        column_invisible="not parent.apply_withholding_tax"/>
+                                    <field name="net_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="payment_state" widget="badge"
+                                        decoration-success="payment_state == 'paid'"
+                                        decoration-warning="payment_state == 'unpaid'"/>
+                                    <field name="payment_move_id" readonly="1"/>
+                                    <button name="action_pay" string="Pay" type="object"
+                                        invisible="payment_state == 'paid' or parent.state not in ('declared',)"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Accounting" name="accounting">
+                            <group>
+                                <group string="Journals &amp; Accounts">
+                                    <field name="journal_id" readonly="state != 'draft'"/>
+                                    <field name="retained_earnings_account_id" readonly="state != 'draft'"/>
+                                    <field name="dividend_payable_account_id" readonly="state != 'draft'"/>
+                                </group>
+                                <group string="German Withholding Tax (KapESt)">
+                                    <field name="apply_withholding_tax" readonly="state != 'draft'"/>
+                                    <field name="withholding_tax_rate" readonly="state != 'draft'"
+                                        invisible="not apply_withholding_tax"/>
+                                    <field name="soli_rate" readonly="state != 'draft'"
+                                        invisible="not apply_withholding_tax"/>
+                                    <field name="withholding_tax_account_id" readonly="state != 'draft'"
+                                        invisible="not apply_withholding_tax"/>
+                                </group>
+                            </group>
+                            <group string="Journal Entries" invisible="not declaration_move_id">
+                                <field name="declaration_move_id" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_equity_dividend" model="ir.actions.act_window">
+        <field name="name">Dividends</field>
+        <field name="res_model">equity.dividend</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

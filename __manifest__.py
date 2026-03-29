@@ -1,0 +1,21 @@
+{
+    'name': 'Equity Accounting',
+    'version': '19.0.1.0.0',
+    'category': 'Accounting/Accounting',
+    'summary': 'Accounting integration for the Equity module: journal entries, dividends, German COA support.',
+    'author': 'Custom',
+    'depends': ['equity', 'account'],
+    'data': [
+        'security/ir.model.access.csv',
+        'data/ir_sequence_data.xml',
+        'views/equity_security_class_views.xml',
+        'views/equity_transaction_views.xml',
+        'views/equity_dividend_views.xml',
+        'views/res_config_settings_views.xml',
+        'views/account_move_views.xml',
+        'views/equity_menuitem.xml',
+    ],
+    'post_init_hook': 'post_init_hook',
+    'installable': True,
+    'license': 'LGPL-3',
+}

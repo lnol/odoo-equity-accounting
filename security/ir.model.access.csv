@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_equity_dividend_admin,equity.dividend admin,model_equity_dividend,base.group_system,1,1,1,1
+access_equity_dividend_manager,equity.dividend manager,model_equity_dividend,equity.group_equity_manager,1,1,1,0
+access_equity_dividend_viewer,equity.dividend viewer,model_equity_dividend,equity.group_equity_viewer,1,0,0,0
+access_equity_dividend_line_admin,equity.dividend.line admin,model_equity_dividend_line,base.group_system,1,1,1,1
+access_equity_dividend_line_manager,equity.dividend.line manager,model_equity_dividend_line,equity.group_equity_manager,1,1,1,0
+access_equity_dividend_line_viewer,equity.dividend.line viewer,model_equity_dividend_line,equity.group_equity_viewer,1,0,0,0

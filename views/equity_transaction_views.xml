@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend transaction form with state workflow and accounting link -->
+    <record id="view_equity_transaction_form_accounting" model="ir.ui.view">
+        <field name="name">equity.transaction.form.accounting</field>
+        <field name="model">equity.transaction</field>
+        <field name="inherit_id" ref="equity.view_equity_transaction_form"/>
+        <field name="arch" type="xml">
+            <!-- Add statusbar and action buttons to header -->
+            <xpath expr="//form/header" position="inside">
+                <button name="action_post"
+                    string="Post"
+                    type="object"
+                    class="btn-primary"
+                    invisible="state != 'draft'"
+                    data-hotkey="p"/>
+                <button name="action_cancel"
+                    string="Cancel"
+                    type="object"
+                    invisible="state == 'cancelled'"
+                    confirm="Are you sure you want to cancel this transaction? A reversal journal entry will be created if one already exists."/>
+                <button name="action_draft"
+                    string="Reset to Draft"
+                    type="object"
+                    invisible="state != 'cancelled'"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,posted,cancelled"/>
+            </xpath>
+            <!-- Add accounting fields below notes (group containing 'notes' field) -->
+            <xpath expr="//field[@name='notes']/.." position="after">
+                <group string="Accounting" invisible="transaction_type == 'transfer'">
+                    <field name="journal_id"/>
+                    <field name="move_id" readonly="1" invisible="not move_id"/>
+                    <field name="receivable_line_id" readonly="1"
+                        invisible="transaction_type not in ('issuance', 'cancellation') or not receivable_line_id"/>
+                    <field name="payment_state" widget="badge"
+                        invisible="transaction_type not in ('issuance', 'cancellation') or not receivable_line_id"
+                        decoration-success="payment_state == 'paid'"
+                        decoration-warning="payment_state == 'partial'"
+                        decoration-danger="payment_state == 'not_paid'"/>
+                    <field name="payment_date" readonly="1"
+                        invisible="transaction_type not in ('issuance', 'cancellation') or not receivable_line_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Add state column to list view -->
+    <record id="view_equity_transaction_list_accounting" model="ir.ui.view">
+        <field name="name">equity.transaction.list.accounting</field>
+        <field name="model">equity.transaction</field>
+        <field name="inherit_id" ref="equity.view_equity_transaction_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-muted">state == 'cancelled'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='attachment_number']" position="before">
+                <field name="state" widget="badge"
+                    decoration-success="state == 'posted'"
+                    decoration-info="state == 'draft'"
+                    decoration-danger="state == 'cancelled'"/>
+                <field name="payment_state" widget="badge"
+                    decoration-success="payment_state == 'paid'"
+                    decoration-warning="payment_state == 'partial'"
+                    decoration-danger="payment_state == 'not_paid'"
+                    optional="show"/>
+                <field name="payment_date" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

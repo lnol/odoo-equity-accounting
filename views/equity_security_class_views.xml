@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend security class form with accounting fields -->
+    <record id="view_equity_security_class_form_accounting" model="ir.ui.view">
+        <field name="name">equity.security.class.form.accounting</field>
+        <field name="model">equity.security.class</field>
+        <field name="inherit_id" ref="equity.view_equity_security_class_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='dividend_payout']" position="after">
+                <separator string="Accounting"/>
+                <field name="par_value" widget="float"/>
+                <field name="par_value_currency_id" groups="base.group_multi_currency"/>
+                <field name="equity_account_id"/>
+                <field name="capital_reserve_account_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

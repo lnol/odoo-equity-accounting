@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Dividends under Equity > Ownership -->
+    <menuitem
+        id="menu_equity_ownership_dividends"
+        name="Dividends"
+        parent="equity.menu_equity_ownership"
+        action="equity_accounting.action_equity_dividend"
+        sequence="25"/>
+</odoo>
